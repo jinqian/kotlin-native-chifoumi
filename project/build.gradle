@@ -1,0 +1,86 @@
+plugins {
+    id 'kotlin-multiplatform' version '1.3.31'
+    id 'org.hidetake.ssh' version '2.1.0'
+}
+
+repositories {
+    mavenCentral()
+    jcenter()
+    maven { url 'https://dl.bintray.com/kotlin/ktor' }
+}
+
+ext.ktor_version = '1.2.1'
+
+def tensorflowHome = "/Users/qian/.konan/third-party/tensorflow"
+
+kotlin {
+    targets {
+        fromPreset(kotlin.presets.linuxArm32Hfp, 'chifumi') {
+            compilations.main.outputKinds 'EXECUTABLE'
+            compilations.main.entryPoint 'chifumi.robot.main'
+
+            compilations.main.cinterops {
+                pigpio {
+                    includeDirs 'src/include/pigpio'
+                }
+                pca9685 {
+                    includeDirs 'src/include/pca9685'
+                }
+                tflite {
+                    includeDirs 'src/include/tflite'
+                }
+            }
+            // libpigpio.so are compiled on raspberry pi and copied here
+            compilations.main.linkerOpts '-lpigpio -Lsrc/include/pigpio'
+
+            // libPCA9685.so are compiled on raspberry pi and copied here
+            compilations.main.linkerOpts '-lPCA9685 -Lsrc/include/pca9685'
+
+            // libtensorflow-lite.a is compiled on a Linux machine and copied herer
+            compilations.main.linkerOpts '-ltensorflow-lite -Lsrc/include/tflite'
+        }
+
+        fromPreset(kotlin.presets.macosX64, 'tensorflow') {
+            compilations.main.outputKinds 'EXECUTABLE'
+            compilations.main.entryPoint 'sample.tensorflow.main'
+            compilations.main.linkerOpts "-L$tensorflowHome/lib", '-ltensorflow'
+            compilations.main.cinterops {
+                tensorflow {
+                    includeDirs "$tensorflowHome/include"
+                }
+            }
+        }
+
+        fromPreset(presets.jvm, 'server')
+    }
+
+    sourceSets {
+        serverMain {
+            dependencies {
+                implementation "io.ktor:ktor-server-core:$ktor_version"
+                implementation "io.ktor:ktor-server-netty:$ktor_version"
+            }
+        }
+    }
+}
+
+remotes {
+    pi {
+        host = '192.168.1.98'
+        user = 'pi'
+        identity = file('/Users/qian/.ssh/id_rsa')
+    }
+}
+
+task deployOnPi {
+    doLast {
+        ssh.run {
+            session(remotes.pi) {
+                def sourceFile = "$buildDir/bin/chifumi/mainDebugExecutable/main.kexe"
+                def destinationDir = "/home/pi/qian/playground"
+
+                put from: sourceFile, into: destinationDir
+            }
+        }
+    }
+}
