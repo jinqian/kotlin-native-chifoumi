@@ -35,6 +35,7 @@ private fun initPWMDriver() {
         adapterNumber.toUByte(),
         I2C_SERVO_ADDRESS.toUByte()
     )
+
     // TODO check the init result, 0 for success, other value for failure
     PCA9685_initPWM(
         fileDescriptor,
@@ -44,24 +45,25 @@ private fun initPWMDriver() {
 
     // https://jonnyzzz.com/blog/2019/01/14/kn-intptr/
     memScoped {
-        val setOnValues = allocArray<UIntVar>(_PCA9685_CHANS)
-        val setOffValues = allocArray<UIntVar>(_PCA9685_CHANS)
+        val onValues = allocArray<UIntVar>(_PCA9685_CHANS)
+        val offValues = allocArray<UIntVar>(_PCA9685_CHANS)
 
         for (i in 0..15) {
-            setOnValues[i] = SERVO_ACTIVATED_ANGLE.toUInt()
+            onValues[i] = SERVO_ACTIVATED_ANGLE.toUInt()
         }
         for (i in 0..15) {
-            setOffValues[i] = SERVO_NON_ACTIVATED_ANGLE.toUInt()
+            offValues[i] = SERVO_NON_ACTIVATED_ANGLE.toUInt()
         }
 
-        PCA9685_setPWMVals(fileDescriptor, I2C_SERVO_ADDRESS.toUByte(), setOnValues, setOffValues)
+        PCA9685_setPWMVals(fileDescriptor, I2C_SERVO_ADDRESS.toUByte(), onValues, offValues)
 
-        var servoMotorCount = 3
-        while (servoMotorCount > 0) {
-            PCA9685_setPWMVals(fileDescriptor, I2C_SERVO_ADDRESS.toUByte(), setOffValues, setOnValues)
+        // calibrate servomotors
+        var calibrationCount = 3
+        while (calibrationCount > 0) {
+            PCA9685_setPWMVals(fileDescriptor, I2C_SERVO_ADDRESS.toUByte(), offValues, onValues)
             gpioSleep(PI_TIME_RELATIVE, 1, 0)
-            PCA9685_setPWMVals(fileDescriptor, I2C_SERVO_ADDRESS.toUByte(), setOnValues, setOffValues)
-            servoMotorCount--
+            PCA9685_setPWMVals(fileDescriptor, I2C_SERVO_ADDRESS.toUByte(), onValues, offValues)
+            calibrationCount--
         }
     }
 }
