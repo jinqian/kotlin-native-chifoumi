@@ -43,16 +43,20 @@ private fun initPWMDriver() {
         PWM_FREQUENCY.toUInt()
     )
 
+    setPWMValues(fileDescriptor)
+}
+
+fun setPWMValues(fileDescriptor: Int) {
     // https://jonnyzzz.com/blog/2019/01/14/kn-intptr/
     memScoped {
         val onValues = allocArray<UIntVar>(_PCA9685_CHANS)
         val offValues = allocArray<UIntVar>(_PCA9685_CHANS)
 
-        for (i in 0..15) {
-            onValues[i] = SERVO_ACTIVATED_ANGLE.toUInt()
+        for (i in 0 until _PCA9685_CHANS - 1) {
+            onValues[i] = SERVO_ON_ANGLE.toUInt()
         }
-        for (i in 0..15) {
-            offValues[i] = SERVO_NON_ACTIVATED_ANGLE.toUInt()
+        for (i in 0 until _PCA9685_CHANS - 1) {
+            offValues[i] = SERVO_OFF_ANGLE.toUInt()
         }
 
         PCA9685_setPWMVals(fileDescriptor, I2C_SERVO_ADDRESS.toUByte(), onValues, offValues)
@@ -68,7 +72,23 @@ private fun initPWMDriver() {
     }
 }
 
-val onButtonPressed = staticCFunction<Int, Int, UInt, Unit> {gpio, level, tick ->
+fun setPWMValuesAlso(fileDescriptor: Int) {
+    val onValues = UIntArray(_PCA9685_CHANS)
+    for (i in 0 until _PCA9685_CHANS - 1) {
+        onValues[i] = SERVO_ON_ANGLE.toUInt()
+    }
+    val offValues = UIntArray(_PCA9685_CHANS)
+    for (i in 0 until _PCA9685_CHANS - 1) {
+        offValues[i] = SERVO_OFF_ANGLE.toUInt()
+    }
+
+    PCA9685_setPWMVals(
+        fileDescriptor, I2C_SERVO_ADDRESS.toUByte(),
+        onValues.toCValues(), offValues.toCValues()
+    )
+}
+
+val onButtonPressed = staticCFunction<Int, Int, UInt, Unit> { gpio, level, tick ->
     when (level) {
         0 -> {
             println("Button Pressed down, level 0")
