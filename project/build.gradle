@@ -1,45 +1,33 @@
 plugins {
-    id 'kotlin-multiplatform' version '1.3.31'
+    id 'kotlin-multiplatform' version '1.3.50'
     id 'org.hidetake.ssh' version '2.10.1'
 }
 
 repositories {
     mavenCentral()
     jcenter()
-    maven { url 'https://dl.bintray.com/kotlin/ktor' }
 }
 
-ext.ktor_version = '1.2.1'
-
 kotlin {
-    targets {
-        fromPreset(kotlin.presets.linuxArm32Hfp, 'chifumi') {
-            compilations.main.outputKinds 'EXECUTABLE'
-            compilations.main.entryPoint 'chifumi.robot.main'
+    linuxArm32Hfp("chifumi") {
+        binaries {
+            executable {
+                entryPoint "chifumi.robot.main"
 
-            compilations.main.cinterops {
-                pigpio {
-                    includeDirs 'src/include/pigpio'
-                }
-                pca9685 {
-                    includeDirs 'src/include/pca9685'
-                }
+                // libpigpio.so are compiled on raspberry pi and copied here
+                linkerOpts("-Lsrc/include/pigpio", "-lpigpio")
+
+                // libPCA9685.so are compiled on raspberry pi and copied here
+                linkerOpts("-Lsrc/include/pca9685", "-lpca9685")
             }
-            // libpigpio.so are compiled on raspberry pi and copied here
-            compilations.main.linkerOpts '-lpigpio -Lsrc/include/pigpio'
-
-            // libPCA9685.so are compiled on raspberry pi and copied here
-            compilations.main.linkerOpts '-lPCA9685 -Lsrc/include/pca9685'
         }
 
-        fromPreset(presets.jvm, 'server')
-    }
-
-    sourceSets {
-        serverMain {
-            dependencies {
-                implementation "io.ktor:ktor-server-core:$ktor_version"
-                implementation "io.ktor:ktor-server-netty:$ktor_version"
+        compilations.main.cinterops {
+            pigpio {
+                includeDirs 'src/include/pigpio'
+            }
+            pca9685 {
+                includeDirs 'src/include/pca9685'
             }
         }
     }
@@ -58,7 +46,7 @@ task deployOnPi {
     doLast {
         ssh.run {
             session(remotes.pi) {
-                def sourceFile = "$buildDir/bin/chifumi/mainDebugExecutable/main.kexe"
+                def sourceFile = "$buildDir/bin/chifumi/releaseExecutable/chifumi-robot.kexe"
                 def destinationDir = "/home/pi/qian/playground"
 
                 put from: sourceFile, into: destinationDir
