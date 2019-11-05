@@ -7,7 +7,7 @@ Slide: https://speakerdeck.com/jinqian/bridge-the-physical-world-kotlin-native-o
 
 ### Circuit
 
-This circuit schema reprents what I use in my project. Choose the pins you want to use and update the code if necessary, as long as it does not burn your Pi!
+This circuit schema represents what I use in my project:
 
 ![circuit](img/circuit-pi.png)
 
