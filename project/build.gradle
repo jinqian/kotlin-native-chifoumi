@@ -15,10 +15,12 @@ kotlin {
                 entryPoint "chifumi.robot.main"
 
                 // libpigpio.so are compiled on raspberry pi and copied here
-                linkerOpts("-Lsrc/include/pigpio", "-lpigpio")
+                linkerOpts("-Lsrc/lib/pigpio", "-lpigpio")
 
                 // libPCA9685.so are compiled on raspberry pi and copied here
-                linkerOpts("-Lsrc/include/pca9685", "-lpca9685")
+                linkerOpts("-Lsrc/lib/pca9685", "-lpca9685")
+
+                linkerOpts("-Lsrc/lib/tensorflow", "-ltensorflow")
             }
         }
 
@@ -28,6 +30,9 @@ kotlin {
             }
             pca9685 {
                 includeDirs 'src/include/pca9685'
+            }
+            tensorflow {
+                includeDirs 'src/include/tensorflow'
             }
         }
     }

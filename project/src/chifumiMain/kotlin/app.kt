@@ -6,9 +6,12 @@ import pca9685.PCA9685_openI2C
 import pca9685.PCA9685_setPWMVals
 import pca9685._PCA9685_CHANS
 import pigpio.*
+import tensorflow.TF_Version
 import kotlin.system.getTimeMillis
 
 fun main() {
+
+    println("Hello, TensorFlow ${TF_Version()!!.toKString()}!")
 
     initGPIO()
 
@@ -124,7 +127,7 @@ fun blinkLed() {
 
 fun takePicture() {
     println("Take picture now!")
-    platform.posix.system("raspistill -t 3000 -vf -hf -o camera-output/${getTimeMillis()}.jpg")
+    platform.posix.system("mkdir -p camera-output && raspistill -t 3000 -vf -hf -o camera-output/${getTimeMillis()}.jpg")
 }
 
 fun initPortWithMode(port: UInt, mode: Int) {
