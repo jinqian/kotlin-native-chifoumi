@@ -1,17 +1,22 @@
 package chifumi.robot
 
+import chifumi.robot.tensorflow.Graph
+import cnames.structs.TF_Operation
+import cnames.structs.TF_Status
+import cnames.structs.TF_Tensor
 import kotlinx.cinterop.*
 import pca9685.PCA9685_initPWM
 import pca9685.PCA9685_openI2C
 import pca9685.PCA9685_setPWMVals
 import pca9685._PCA9685_CHANS
 import pigpio.*
-import tensorflow.TF_Version
+import platform.posix.size_t
+import tensorflow.*
 import kotlin.system.getTimeMillis
 
 fun main() {
 
-    println("Hello, TensorFlow ${TF_Version()!!.toKString()}!")
+    helloTensorFlow()
 
     initGPIO()
 
@@ -23,6 +28,8 @@ fun main() {
 
     takePicture()
 }
+
+// region gpio
 
 private fun initGPIO() {
     if (gpioInitialise() < 0) {
@@ -102,7 +109,6 @@ val onButtonPressed = staticCFunction<Int, Int, UInt, Unit> { gpio, level, tick 
     }
 }
 
-
 private fun setupButton() {
     val buttonPort = GPIO_BUTTON.toUInt()
     initPortWithMode(buttonPort, PI_INPUT)
@@ -125,14 +131,84 @@ fun blinkLed() {
     }
 }
 
-fun takePicture() {
-    println("Take picture now!")
-    platform.posix.system("mkdir -p camera-output && raspistill -t 3000 -vf -hf -o camera-output/${getTimeMillis()}.jpg")
-}
-
-fun initPortWithMode(port: UInt, mode: Int) {
+private fun initPortWithMode(port: UInt, mode: Int) {
     if (gpioSetMode(port, mode.toUInt()) < 0) {
         println("Could not set mode for GPIO$port")
         return
     }
 }
+
+// endregion
+
+// region camera
+
+fun takePicture() {
+    println("Take picture now!")
+    platform.posix.system("mkdir -p camera-output && raspistill -t 3000 -vf -hf -o camera-output/${getTimeMillis()}.jpg")
+}
+
+// endregion
+
+// region tensorflow
+
+private fun helloTensorFlow() {
+    println("Hello, TensorFlow ${TF_Version()!!.toKString()}!")
+    val result = Graph().run {
+        val input = intInput()
+
+        withSession { invoke(input + constant(2), inputsWithValues = listOf(input to scalarTensor(3))).scalarIntValue }
+    }
+
+    println("3 + 2 is $result.")
+}
+
+typealias Status = CPointer<TF_Status>
+typealias Operation = CPointer<TF_Operation>
+typealias Tensor = CPointer<TF_Tensor>
+
+val Status.isOk: Boolean get() = TF_GetCode(this) == TF_OK
+val Status.errorMessage: String get() = TF_Message(this)!!.toKString()
+fun Status.delete() = TF_DeleteStatus(this)
+fun Status.validate() {
+    try {
+        if (!isOk) {
+            throw Error("Status is not ok: $errorMessage")
+        }
+    } finally {
+        delete()
+    }
+}
+
+inline fun <T> statusValidated(block: (Status) -> T): T {
+    val status = TF_NewStatus()!!
+    val result = block(status)
+    status.validate()
+    return result
+}
+
+fun scalarTensor(value: Int): Tensor {
+    val data = nativeHeap.allocArray<IntVar>(1)
+    data[0] = value
+
+    return TF_NewTensor(
+        TF_INT32,
+        dims = null, num_dims = 0,
+        data = data, len = IntVar.size.convert(),
+        deallocator = staticCFunction { dataToFree, _, _ -> nativeHeap.free(dataToFree!!.reinterpret<IntVar>()) },
+        deallocator_arg = null
+    )!!
+}
+
+val Tensor.scalarIntValue: Int
+    get() {
+        if (TF_INT32 != TF_TensorType(this) || IntVar.size.convert<size_t>() != TF_TensorByteSize(this)) {
+            throw Error("Tensor is not of type int.")
+        }
+        if (0 != TF_NumDims(this)) {
+            throw Error("Tensor is not scalar.")
+        }
+
+        return TF_TensorData(this)!!.reinterpret<IntVar>().pointed.value
+    }
+
+// endregion
