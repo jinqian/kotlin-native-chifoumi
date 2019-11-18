@@ -63,6 +63,8 @@ $ cd Tensorflow-bin/C-library/2.0.0-armhf
 $ ./install-buster.sh
 ```
 
+Note: in order to use Tensorflow 2.0.0 you will need Raspbian/Debian Buster which is bundled with glibc 2.28.
+
 /!\ **For cross-compilation on a Linux machine or a MacOS, you have to download these libraries to your machine for linking during the compilation. In my code you can see they are gitignored because github does not allow file larger than 100MB.** /!\
 
 ## Generate the executable
