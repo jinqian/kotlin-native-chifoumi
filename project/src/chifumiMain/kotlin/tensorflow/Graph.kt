@@ -1,8 +1,5 @@
 package chifumi.robot.tensorflow
 
-import chifumi.robot.Operation
-import chifumi.robot.scalarTensor
-import chifumi.robot.statusValidated
 import cnames.structs.TF_OperationDescription
 import kotlinx.cinterop.CPointer
 import kotlinx.cinterop.allocArray
@@ -11,7 +8,7 @@ import kotlinx.cinterop.memScoped
 import tensorflow.*
 
 class Graph {
-    val tensorflowGraph = TF_NewGraph()!!
+    val tensorflowGraph = TF_NewGraph()
 
     inline fun operation(
         type: String,

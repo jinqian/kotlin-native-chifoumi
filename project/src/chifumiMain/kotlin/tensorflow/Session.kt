@@ -1,8 +1,5 @@
 package chifumi.robot.tensorflow
 
-import chifumi.robot.Operation
-import chifumi.robot.Tensor
-import chifumi.robot.statusValidated
 import cnames.structs.TF_Session
 import cnames.structs.TF_Tensor
 import kotlinx.cinterop.*
