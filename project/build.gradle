@@ -1,5 +1,5 @@
 plugins {
-    id 'kotlin-multiplatform' version '1.3.50'
+    id 'kotlin-multiplatform' version '1.3.60'
     id 'org.hidetake.ssh' version '2.10.1'
 }
 
