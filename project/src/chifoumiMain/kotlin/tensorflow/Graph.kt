@@ -1,4 +1,4 @@
-package chifumi.robot.tensorflow
+package chifoumi.robot.tensorflow
 
 import cnames.structs.TF_OperationDescription
 import kotlinx.cinterop.CPointer

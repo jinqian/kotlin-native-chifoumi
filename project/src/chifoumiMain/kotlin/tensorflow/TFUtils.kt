@@ -1,4 +1,4 @@
-package chifumi.robot.tensorflow
+package chifoumi.robot.tensorflow
 
 import cnames.structs.TF_Operation
 import cnames.structs.TF_Status

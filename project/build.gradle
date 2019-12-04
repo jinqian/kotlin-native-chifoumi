@@ -9,10 +9,10 @@ repositories {
 }
 
 kotlin {
-    linuxArm32Hfp("chifumi") {
+    linuxArm32Hfp("chifoumi") {
         binaries {
             executable {
-                entryPoint "chifumi.robot.main"
+                entryPoint "chifoumi.robot.main"
 
                 // libpigpio.so are compiled on raspberry pi and copied here
                 linkerOpts("-Lsrc/lib/pigpio", "-lpigpio")
@@ -51,7 +51,7 @@ task deployOnPi {
     doLast {
         ssh.run {
             session(remotes.pi) {
-                def sourceFile = "$buildDir/bin/chifumi/releaseExecutable/chifumi-robot.kexe"
+                def sourceFile = "$buildDir/bin/chifoumi/releaseExecutable/chifoumi-robot.kexe"
                 def destinationDir = "/home/pi/qian/playground"
 
                 put from: sourceFile, into: destinationDir

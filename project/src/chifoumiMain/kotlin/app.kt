@@ -1,6 +1,6 @@
-package chifumi.robot
+package chifoumi.robot
 
-import chifumi.robot.tensorflow.TensorFlowInterpreter
+import chifoumi.robot.tensorflow.TensorFlowInterpreter
 import kotlinx.cinterop.*
 import pca9685.PCA9685_initPWM
 import pca9685.PCA9685_openI2C

@@ -1,4 +1,4 @@
-package chifumi.robot.tensorflow
+package chifoumi.robot.tensorflow
 
 import cnames.structs.TF_Session
 import cnames.structs.TF_Tensor

@@ -1,4 +1,4 @@
-package chifumi.robot.tensorflow
+package chifoumi.robot.tensorflow
 
 import kotlinx.cinterop.*
 import platform.linux.malloc
