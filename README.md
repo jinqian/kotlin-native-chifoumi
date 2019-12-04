@@ -75,7 +75,7 @@ Compile the project:
 $ ./gradlew build
 ```
 
-After a successful build you should be able to see that the binaries are generated under the `build/bin/chifumi` folder. In order to test the binary, deploy it on your Pi via SSH, make sure you update the SSH configuration, source folder and destination folder in `build.gradle` with your own configurations:
+After a successful build you should be able to see that the binaries are generated under the `build/bin/chifoumi` folder. In order to test the binary, deploy it on your Pi via SSH, make sure you update the SSH configuration, source folder and destination folder in `build.gradle` with your own configurations:
 
 ```
 $ ./gradlew deployOnPi
@@ -86,8 +86,8 @@ $ ./gradlew deployOnPi
 If it's the first time you deploy on your Pi, you need to make sure your `.kexe` file is executable, then execute the binary with `sudo` to test with your circuit:
 
 ```
-$ chmod 777 chifumi-robot.kexe
-$ sudo ./chifumi-robot.kexe
+$ chmod 777 chifoumi-robot.kexe
+$ sudo ./chifoumi-robot.kexe
 ```
 
 ## Other ideas
